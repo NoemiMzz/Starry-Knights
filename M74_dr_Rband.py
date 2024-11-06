@@ -40,18 +40,6 @@ dark_300 = np.array(dark_300)
 print('Darks imported \n')
 
 
-# collecting all the flat for Ha images
-print('...')
-flatHa = []
-flatHa.append(fits.open(path+'20241029/Raw_data/Calib-01-flat_Ha_002.fit')[0].data)
-flatHa.append(fits.open(path+'20241029/Raw_data/Calib-01-flat_Ha_003.fit')[0].data)
-flatHa.append(fits.open(path+'20241029/Raw_data/Calib-01-flat_Ha_004.fit')[0].data)
-flatHa.append(fits.open(path+'20241029/Raw_data/Calib-01-flat_Ha_005.fit')[0].data)
-flatHa.append(fits.open(path+'20241029/Raw_data/Calib-01-flat_Ha_006.fit')[0].data)
-flatHa = np.array(flatHa)
-print('Ha flats imported \n')
-
-
 # collecting all the flat for r band images
 print('...')
 flatR = []
@@ -62,17 +50,6 @@ flatR.append(fits.open(path+'20241029/Raw_data/Calib-01-flat_r_020.fit')[0].data
 flatR.append(fits.open(path+'20241029/Raw_data/Calib-01-flat_r_021.fit')[0].data)
 flatR = np.array(flatR)
 print('r band flats imported \n')
-
-
-#collecting the Ha exposure time
-Ha_head = fits.open(path+'20241029/Raw_data/M74_Ha_046.fit')[0].header
-texp_Ha = Ha_head['EXPTIME']
-#collecting all the Ha images
-print('...')
-Ha = []
-Ha.append(fits.open(path+'20241029/Raw_data/M74_Ha_046.fit')[0].data)
-Ha = np.array(Ha)
-print('Ha images imported \n')
 
 
 #collecting the r band exposure time
@@ -86,6 +63,7 @@ R.append(fits.open(path+'20241029/Raw_data/M74_r_043.fit')[0].data)
 R.append(fits.open(path+'20241029/Raw_data/M74_r_044.fit')[0].data)
 R.append(fits.open(path+'20241029/Raw_data/M74_r_045.fit')[0].data)
 R = np.array(R)
+print('exposure time: ' + str(texp_R))
 print('r band images imported \n')
 
 
@@ -115,21 +93,6 @@ out.writeto(path+'20241029/20241029_dark300.fit', overwrite=True)
 plt.figure()
 plt.imshow(master_dark300, cmap='viridis', clim=[300, 500])
 plt.title('Master dark $t_{exp}=300$')
-plt.colorbar()
-plt.show()
-
-
-### master flat for Ha ###
-unbiased_flatHa = [(x - master_bias) for x in flatHa]   #I subtract the master bias for each flat image
-norm_flatHa = [(y / np.mean(y)) for y in unbiased_flatHa]   #I normalize such as mean=1
-master_flatHa = np.median(norm_flatHa, axis=0)
-#save
-out = fits.PrimaryHDU(master_flatHa)
-out.writeto(path+'20241029/20241029_flatHa.fit', overwrite=True)
-#plot
-plt.figure()
-plt.imshow(master_flatHa, cmap='viridis', clim=[0.9, 1.1])
-plt.title('Master flat for $H\\alpha$')
 plt.colorbar()
 plt.show()
 
