@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
 
+#%%
 ### DATA #######################################################################################################
 
 path='/Volumes/Noemi USB/Lab data acquisition/'
@@ -60,7 +61,7 @@ print('Ha images imported \n')
 
 
 #%%
-### STACKING calib FRAMES ################################################################################
+### STACKING CALIBRATION FRAMES ################################################################################
 
 ### master bias ###
 master_bias = np.median(bias, axis=0)

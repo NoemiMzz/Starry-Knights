@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
 
+#%%
 ### DATA #######################################################################################################
 
 path='/Volumes/Noemi USB/Lab data acquisition/'
