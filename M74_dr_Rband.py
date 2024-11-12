@@ -7,19 +7,17 @@ from astropy.io import fits
 
 path='/Volumes/Noemi USB/Lab data acquisition/'
 
+#the calibration images are from 11nov since the ones from 29oct had some issues
+
 # collecting all the bias images
 print('...')
 bias = []
-bias.append(fits.open(path+'20241029/Raw_data/Calibration_052_Bias.fit')[0].data)
-bias.append(fits.open(path+'20241029/Raw_data/Calibration_053_Bias.fit')[0].data)
-bias.append(fits.open(path+'20241029/Raw_data/Calibration_054_Bias.fit')[0].data)
-bias.append(fits.open(path+'20241029/Raw_data/Calibration_055_Bias.fit')[0].data)
-bias.append(fits.open(path+'20241029/Raw_data/Calibration_056_Bias.fit')[0].data)
-bias.append(fits.open(path+'20241029/Raw_data/Calibration_057_Bias.fit')[0].data)
-bias.append(fits.open(path+'20241029/Raw_data/Calibration_058_Bias.fit')[0].data)
-bias.append(fits.open(path+'20241029/Raw_data/Calibration_059_Bias.fit')[0].data)
-bias.append(fits.open(path+'20241029/Raw_data/Calibration_060_Bias.fit')[0].data)
-bias.append(fits.open(path+'20241029/Raw_data/Calibration_061_Bias.fit')[0].data)
+bias.append(fits.open(path+'20241101/Raw_data/calib_037_bias.fit')[0].data)
+bias.append(fits.open(path+'20241101/Raw_data/calib_038_bias.fit')[0].data)
+bias.append(fits.open(path+'20241101/Raw_data/calib_039_bias.fit')[0].data)
+bias.append(fits.open(path+'20241101/Raw_data/calib_040_bias.fit')[0].data)
+bias.append(fits.open(path+'20241101/Raw_data/calib_041_bias.fit')[0].data)
+bias.append(fits.open(path+'20241101/Raw_data/calib_042_bias.fit')[0].data)
 bias = np.array(bias)
 print('Biases imported \n')
 
@@ -27,16 +25,12 @@ print('Biases imported \n')
 # collecting all the dark images
 print('...')
 dark_300 = []
-dark_300.append(fits.open(path+'20241029/Raw_data/Calibration_052_Dark300.fit')[0].data)
-dark_300.append(fits.open(path+'20241029/Raw_data/Calibration_053_Dark300.fit')[0].data)
-dark_300.append(fits.open(path+'20241029/Raw_data/Calibration_054_Dark300.fit')[0].data)
-dark_300.append(fits.open(path+'20241029/Raw_data/Calibration_055_Dark300.fit')[0].data)
-dark_300.append(fits.open(path+'20241029/Raw_data/Calibration_056_Dark300.fit')[0].data)
-dark_300.append(fits.open(path+'20241029/Raw_data/Calibration_057_Dark300.fit')[0].data)
-dark_300.append(fits.open(path+'20241029/Raw_data/Calibration_058_Dark300.fit')[0].data)
-dark_300.append(fits.open(path+'20241029/Raw_data/Calibration_059_Dark300.fit')[0].data)
-dark_300.append(fits.open(path+'20241029/Raw_data/Calibration_060_Dark300.fit')[0].data)
-dark_300.append(fits.open(path+'20241029/Raw_data/Calibration_061_Dark300.fit')[0].data)
+dark_300.append(fits.open(path+'20241101/Raw_data/calib_037_dark300.fit')[0].data)
+dark_300.append(fits.open(path+'20241101/Raw_data/calib_038_dark300.fit')[0].data)
+dark_300.append(fits.open(path+'20241101/Raw_data/calib_039_dark300.fit')[0].data)
+dark_300.append(fits.open(path+'20241101/Raw_data/calib_040_dark300.fit')[0].data)
+dark_300.append(fits.open(path+'20241101/Raw_data/calib_041_dark300.fit')[0].data)
+dark_300.append(fits.open(path+'20241101/Raw_data/calib_042_dark300.fit')[0].data)
 dark_300 = np.array(dark_300)
 print('Darks imported \n')
 
@@ -44,11 +38,11 @@ print('Darks imported \n')
 # collecting all the flat for r band images
 print('...')
 flatR = []
-flatR.append(fits.open(path+'20241029/Raw_data/Calib-01-flat_r_017.fit')[0].data)
-flatR.append(fits.open(path+'20241029/Raw_data/Calib-01-flat_r_018.fit')[0].data)
-flatR.append(fits.open(path+'20241029/Raw_data/Calib-01-flat_r_019.fit')[0].data)
-flatR.append(fits.open(path+'20241029/Raw_data/Calib-01-flat_r_020.fit')[0].data)
-flatR.append(fits.open(path+'20241029/Raw_data/Calib-01-flat_r_021.fit')[0].data)
+flatR.append(fits.open(path+'20241101/Raw_data/calib_025_flat_r.fit')[0].data)
+flatR.append(fits.open(path+'20241101/Raw_data/calib_026_flat_r.fit')[0].data)
+flatR.append(fits.open(path+'20241101/Raw_data/calib_027_flat_r.fit')[0].data)
+flatR.append(fits.open(path+'20241101/Raw_data/calib_028_flat_r.fit')[0].data)
+flatR.append(fits.open(path+'20241101/Raw_data/calib_029_flat_r.fit')[0].data)
 flatR = np.array(flatR)
 print('r band flats imported \n')
 
@@ -67,6 +61,19 @@ R = np.array(R)
 print('exposure time: ' + str(texp_R))
 print('r band images imported \n')
 
+n_im = len(R)
+
+
+#%%
+### FUNCTIONS ##################################################################################################
+
+def plotimage(data, minclim, maxclim, title):
+    plt.figure()
+    plt.imshow(data, cmap='viridis', clim=[minclim, maxclim])
+    plt.title(title)
+    plt.colorbar()
+    plt.show()
+
 
 #%%
 ### STACKING CALIBRATION FRAMES ################################################################################
@@ -77,11 +84,7 @@ master_bias = np.median(bias, axis=0)
 out = fits.PrimaryHDU(master_bias)
 out.writeto(path+'20241029/20241029_bias.fit', overwrite=True)
 #plot
-plt.figure()
-plt.imshow(master_bias, cmap='viridis', clim=[300, 500])
-plt.title('Master bias')
-plt.colorbar()
-plt.show()
+plotimage(master_bias, 300, 500, 'Master bias')
 
 
 ### master dark ###
@@ -91,11 +94,7 @@ master_dark300 = np.median(dark_300, axis=0)
 out = fits.PrimaryHDU(master_dark300)
 out.writeto(path+'20241029/20241029_dark300.fit', overwrite=True)
 #plot
-plt.figure()
-plt.imshow(master_dark300, cmap='viridis', clim=[300, 500])
-plt.title('Master dark $t_{exp}=300$')
-plt.colorbar()
-plt.show()
+plotimage(master_dark300, 300, 500, 'Master dark $t_{exp}=300$')
 
 
 ### master flat for R ###
@@ -106,11 +105,7 @@ master_flatR = np.median(norm_flatR, axis=0)
 out = fits.PrimaryHDU(master_flatR)
 out.writeto(path+'20241029/20241029_flatR.fit', overwrite=True)
 #plot
-plt.figure()
-plt.imshow(master_flatR, cmap='viridis', clim=[0.9, 1.1])
-plt.title('Master flat for the r band')
-plt.colorbar()
-plt.show()
+plotimage(master_flatR, 0.9, 1.1, 'Master flat for the r band')
 
 
 #%%
@@ -119,65 +114,15 @@ plt.show()
 ### R band ###
 imagesR = [((r - master_dark300) / master_flatR) for r in R]
 
-#save
-out = fits.PrimaryHDU(imagesR[0])
-out.writeto(path+'20241029/20241029_R01.fit', overwrite=True)
-#plot
-plt.figure()
-plt.imshow(imagesR[0], cmap='viridis', clim=[8000, 8400])
-plt.title('M74 r band - 1')
-plt.colorbar()
-plt.show()
-
-#save
-out = fits.PrimaryHDU(imagesR[1])
-out.writeto(path+'20241029/20241029_R02.fit', overwrite=True)
-#plot
-plt.figure()
-plt.imshow(imagesR[1], cmap='viridis', clim=[7800, 8200])
-plt.title('M74 r band - 2')
-plt.colorbar()
-plt.show()
-
-#save
-out = fits.PrimaryHDU(imagesR[2])
-out.writeto(path+'20241029/20241029_R03.fit', overwrite=True)
-#plot
-plt.figure()
-plt.imshow(imagesR[2], cmap='viridis', clim=[7800, 8200])
-plt.title('M74 r band - 3')
-plt.colorbar()
-plt.show()
-
-#save
-out = fits.PrimaryHDU(imagesR[3])
-out.writeto(path+'20241029/20241029_R04.fit', overwrite=True)
-#plot
-plt.figure()
-plt.imshow(imagesR[3], cmap='viridis', clim=[7600, 8100])
-plt.title('M74 r band - 4')
-plt.colorbar()
-plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#plot images
+plotimage(imagesR[0], 8000, 8400, 'Raw image - 1')
+plotimage(imagesR[1], 7800, 8200, 'Raw image - 2')
+plotimage(imagesR[2], 7800, 8200, 'Raw image - 3')
+plotimage(imagesR[3], 7600, 8100, 'Raw image - 4')
+#and save
+for i in range(n_im):
+    out = fits.PrimaryHDU(imagesR[i])
+    out.writeto(path+'20241029/20241029_int_R0'+str(i+1)+'.fit', overwrite=True)
 
 
 
