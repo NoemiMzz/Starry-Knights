@@ -36,7 +36,7 @@ def plotimage(data, minclim, maxclim, title):
     
 def plotimagebw(data, minclim, maxclim, title):
     plt.figure()
-    plt.imshow(data, cmap='Greys', clim=[minclim, maxclim])
+    plt.imshow(data, cmap='Greys_r', clim=[minclim, maxclim])
     plt.title(title)
     plt.colorbar()
     plt.show()
