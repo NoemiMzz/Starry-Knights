@@ -7,14 +7,14 @@ from tqdm import tqdm
 #%%
 ### DATA #######################################################################################################
 
-path='/Volumes/Noemi USB/Lab data acquisition/'
+path='/Volumes/NOEMI USB/Lab data acquisition/'
 
 #collecting all the r unbiased and flattened images
 print('...')
 images = []
-images.append(fits.open(path+'20241101/20241101_int_Ha01.fit')[0].data)
-images.append(fits.open(path+'20241101/20241101_int_Ha02.fit')[0].data)
-images.append(fits.open(path+'20241101/20241101_int_Ha03.fit')[0].data)
+images.append(fits.open(path+'int_Ha01.fit')[0].data)
+images.append(fits.open(path+'int_Ha02.fit')[0].data)
+images.append(fits.open(path+'int_Ha03.fit')[0].data)
 images = np.array(images)
 print('Ha images imported \n')
 
@@ -118,14 +118,14 @@ plotimage(im_nosky[2], 0, 50, 'Subtracted sky - 3')
 #and save
 for i in range(n_im):
     out = fits.PrimaryHDU(im_nosky[i])
-    out.writeto(path+'20241101/20241101_Ha0'+str(i+1)+'.fit', overwrite=True)
+    out.writeto(path+'Ha0'+str(i+1)+'.fit', overwrite=True)
 
 #plot electron counts
 plt.figure()
 [plt.hist(im_nosky[i].flatten(), bins=150, histtype='step', lw=2, alpha=0.8, label='image '+str(i+1))
  for i in range(n_im)]
 plt.yscale('log')
-plt.xlim(-11000, 14000)
+plt.xlim(-2000, 14000)
 plt.ylabel('# pixels')
 plt.xlabel('electron counts')
 plt.title('Electron counts per pixel - with sky')

@@ -9,15 +9,15 @@ from tqdm import tqdm
 #%%
 ### DATA #######################################################################################################
 
-path='/Volumes/Noemi USB/Lab data acquisition/'
+path='/Volumes/NOEMI USB/Lab data acquisition/'
 
 #collecting all the r unbiased and flattened images
 print('...')
 images = []
-images.append(fits.open(path+'20241029/20241029_int_R01.fit')[0].data)
-images.append(fits.open(path+'20241029/20241029_int_R02.fit')[0].data)
-images.append(fits.open(path+'20241029/20241029_int_R03.fit')[0].data)
-images.append(fits.open(path+'20241029/20241029_int_R04.fit')[0].data)
+images.append(fits.open(path+'int_R01.fit')[0].data)
+images.append(fits.open(path+'int_R02.fit')[0].data)
+images.append(fits.open(path+'int_R03.fit')[0].data)
+images.append(fits.open(path+'int_R04.fit')[0].data)
 images = np.array(images)
 print('r images imported \n')
 
@@ -225,7 +225,7 @@ plotimage(im_nosky[3], 0, 300, 'Subtracted sky - 4')
 #and save
 for i in range(n_im):
     out = fits.PrimaryHDU(im_nosky[i])
-    out.writeto(path+'20241029/20241029_R0'+str(i+1)+'.fit', overwrite=True)
+    out.writeto(path+'R0'+str(i+1)+'.fit', overwrite=True)
 
 #plot electron counts
 plt.figure()
