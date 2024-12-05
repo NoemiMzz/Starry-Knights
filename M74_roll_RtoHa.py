@@ -12,7 +12,7 @@ path='/Volumes/NOEMI USB/Lab data acquisition/'
 print('...')
 images = []
 images.append(fits.open(path+'M74_Ha.fits')[0].data)
-images.append(fits.open(path+'M74_Rband.fits')[0].data)
+images.append(fits.open(path+'M74_noroll_Rband.fits')[0].data)
 images = np.array(images)
 print('Images imported \n')
 
@@ -44,24 +44,25 @@ xcent = []
 ycent = []
 
 for i in range(n_im):
-    xycent = cent.centroid_quadratic(images[i, 1730:1830, 1670:1770])
+    xycent = cent.centroid_quadratic(images[i, 1730:1830, 1670:1770])   #finding centroid of the chosen star
     xcent.append(xycent[0]+1670)
     ycent.append(xycent[1]+1730)
 
 xcent = np.array(xcent)
 ycent = np.array(ycent)
 
-xoff = xcent[0]-xcent
+xoff = xcent[0]-xcent   #compute the displacement of r band with respect to Ha
 yoff = ycent[0]-ycent
 
 print('Displacements:')
 print(xoff)
 print(yoff)
 
+#plot the star centroids
 fig, axs = plt.subplots(1, n_im, figsize=(12, 12*n_im))
 axs = axs.flatten()
 for i in range(n_im):
-    axs[i].imshow(images[i, 1730:1830, 1670:1770], cmap='viridis', clim=[0, 50])
+    axs[i].imshow(images[i, 1730:1830, 1670:1770], cmap='viridis', clim=[0, 0.5])
     axs[i].scatter(xcent[i]-1670, ycent[i]-1730, marker='x', s=70, color='r')
     fig.suptitle('Selected star', y=0.605)
 
@@ -69,19 +70,18 @@ for i in range(n_im):
 #%%
 ### TRANSLATING CENTROIDS ######################################################################################
 
-xoff_int = np.rint(xoff).astype(int)
-yoff_int = np.rint(yoff).astype(int)
-
+xoff_int = np.rint(xoff).astype(int)   #round displacements to int
+yoff_int = np.rint(yoff).astype(int)   #I need to translate for an integer number of pixels
 
 for i in range(n_im):
-    images[i,...] = np.roll(images[i,...], (xoff_int[i], yoff_int[i]), axis = (1,0))
+    images[i,...] = np.roll(images[i,...], (xoff_int[i], yoff_int[i]), axis = (1,0))   #translation
     
 fig, axs = plt.subplots(1, n_im, figsize=(12, 12*n_im))
 axs = axs.flatten()
 for i in range(n_im):
-    axs[i].imshow(images[i, 1730:1830, 1670:1770], cmap='viridis', clim=[0, 50])
+    axs[i].imshow(images[i, 1730:1830, 1670:1770], cmap='viridis', clim=[0, 0.5])
     axs[i].scatter(xcent[0]-1670, ycent[0]-1730, marker='x', s=70, color='r')
     fig.suptitle('Translation', y=0.605)
 
 out = fits.PrimaryHDU(images[1])
-out.writeto(path+'M74_roll_Rband.fits', overwrite=True)
+out.writeto(path+'M74_Rband.fits', overwrite=True)   #now the r band is superimposable to the Ha
