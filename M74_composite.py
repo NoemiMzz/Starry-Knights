@@ -13,10 +13,10 @@ imR = fits.open(path+'M74_Rband.fits')[0].data
 imHa = fits.open(path+'M74_Ha.fits')[0].data
 
 F0 = 3631   #reference flux in Junsky
-lambda_r = 6580   #central wavelenght of the filter in A
-lambda_Ha = 6560
-largHa = 35   #widht of the filter in A
-largR = 1400
+lambda_r = 6225.0   #central wavelenght of the filter in A
+lambda_Ha = 6568.894958496094
+largHa = 36.64978027734375   #widht of the filter in A
+largR = 1290.0
 
 C_r = 17.125059673553615   #calibration coefficients with errors per band
 C_r_err = 0.040374811601885774
@@ -28,7 +28,7 @@ C_Ha_err = 0.01580691822059472
 ### FUNCTIONS ##################################################################################################
 
 def plotimage(data, minclim, maxclim, title):
-    plt.figure()
+    plt.figure(dpi=150)
     plt.imshow(data, cmap='viridis', clim=[minclim, maxclim])
     plt.title(title)
     plt.colorbar()
@@ -48,6 +48,10 @@ def f_norm(fR):
 def net_electrons(fHa, fR, k):
     fR_norm = f_norm(fR)
     return fHa - fR_norm * k
+
+def net(fHa, fR, k):
+    fR_norm = f_norm(fR)
+    return (fHa - fR_norm * k) * largHa * 10**(-C_Ha)
 
 
 #%%
@@ -72,17 +76,20 @@ for n in tqdm(range(len(stars))):
         f = pha.aperture_photometry(im, aperture)   #collect flux from netHa
         ff_net.append(f['aperture_sum'][0])
     star_flux_net.append(ff_net)
+    
+K = 1.04   #chosen correction factor
 
 plt.figure()
 [plt.plot(kk, star_flux_net[n] / star_flux_Ha[n], color='royalblue', lw=1) for n in range(len(stars))]
 plt.axhline(0, color='black')
-plt.axvline(1.15, color='black', ls='dashed')   #chosen k
+plt.axvline(K, color='black', ls='dashed')   #chosen k
 plt.title('Correction factor estimation')
 plt.xlabel('correction factor')
 plt.ylabel('$F_{net}$ / $F_{H_{\\alpha}}$ ($e^{-}/s$)')
 plt.show()
 
-
+imnetHa = net(imHa, imR, K)
+plotimage(imnetHa, 0, 1.7e-16, 'Net $H_{\\alpha}$')
 
 
 
