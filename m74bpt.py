@@ -17,9 +17,9 @@ printfileinfo = False
 with fits.open(path+'m74datacube.fits') as hdul:
     
     if printfileinfo:
-        hdul.info()   #esamina le informazioni delle estensioni nel file
+        hdul.info()   #examine the infos about the extensions in the file
 
-    data_cube = hdul[0].data   #estrai il data cube dalla prima estensione (solitamente 0 è l'header primario)
+    data_cube = hdul[0].data   #extract the data cube from the first extension (usually 0 is the primary header)
     header = hdul[0].header
 
     imHa = hdul['HA6562_FLUX'].data   #import fluxes
@@ -151,9 +151,21 @@ flux = []
 im_SN_nonan = np.where(np.isnan(im_SN), 0, im_SN)
 
 for i in range(4):
+    print("-------FILTER ", i)
     f = []
     for ap in apertures:
-        f.append(pha.aperture_photometry(im_SN_nonan[i], ap)['aperture_sum'][0])
+        #counting the number of pixels in each aperture
+        mask = ap.to_mask(method='center')
+        cutout = mask.to_image(im_SN[i].shape)
+        covered_pixels = im_SN[i][cutout.astype(bool)]
+        n_pix = np.count_nonzero(~np.isnan(covered_pixels))
+        print('\n', n_pix)
+        if n_pix < 305:   #if the number of valid pixels inside the aperture is <305
+            ff = pha.aperture_photometry(im_SN_nonan[i], ap)['aperture_sum'][0]
+            f.append( ff / n_pix * 305 )   #I normalize the flux on 305 pixels
+            print("norm")
+        else:
+            f.append(pha.aperture_photometry(im_SN_nonan[i], ap)['aperture_sum'][0])
     f = np.array(f)
     flux.append(f)
     
