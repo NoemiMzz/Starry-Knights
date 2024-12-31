@@ -151,7 +151,6 @@ flux = []
 im_SN_nonan = np.where(np.isnan(im_SN), 0, im_SN)
 
 for i in range(4):
-    print("-------FILTER ", i)
     f = []
     for ap in apertures:
         #counting the number of pixels in each aperture
@@ -159,11 +158,9 @@ for i in range(4):
         cutout = mask.to_image(im_SN[i].shape)
         covered_pixels = im_SN[i][cutout.astype(bool)]
         n_pix = np.count_nonzero(~np.isnan(covered_pixels))
-        print('\n', n_pix)
         if n_pix < 305:   #if the number of valid pixels inside the aperture is <305
             ff = pha.aperture_photometry(im_SN_nonan[i], ap)['aperture_sum'][0]
             f.append( ff / n_pix * 305 )   #I normalize the flux on 305 pixels
-            print("norm")
         else:
             f.append(pha.aperture_photometry(im_SN_nonan[i], ap)['aperture_sum'][0])
     f = np.array(f)
