@@ -29,7 +29,7 @@ with fits.open(path+'m74datacube.fits') as hdul:
     #imNii = hdul['NII6548_FLUX'].data
     im = [imHa, imSii, imHb, imOiii]
     im = np.array(im)
-    im_names = ["$H_{\\alpha}$", "SII", "$H_{\\beta}$", "OIII"]
+    im_names = ["$H\\alpha$", "SII", "$H\\beta$", "OIII"]
 
     imHa_err = hdul['HA6562_FLUX_ERR'].data   #import errors
     imSii_err= hdul['SII6716_FLUX_ERR'].data
