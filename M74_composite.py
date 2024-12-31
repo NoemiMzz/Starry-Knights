@@ -27,6 +27,7 @@ K = 7.9e-42   #SFR factor in [solar mass * s / yr / erg]
 d = 9.5   #distance of the galaxy in Mpc
 dist = d * 3e24   #convert distance from Mpc to cm
 
+
 #%%
 ### FUNCTIONS ##################################################################################################
 
