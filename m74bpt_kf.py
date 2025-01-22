@@ -2,7 +2,6 @@
 #import os
 #from google.colab import drive
 import numpy as np
-import matplotlib.colors as mc
 import matplotlib.pyplot as plt
 from astropy.io import fits
 import photutils.aperture as pha
@@ -24,20 +23,20 @@ with fits.open(path+'m74datacube.fits') as hdul:
     header = hdul[0].header
 
     imHa = hdul['HA6562_FLUX'].data   #import fluxes
-    imSii= hdul['SII6716_FLUX'].data
+    #imSii= hdul['SII6716_FLUX'].data
     imOiii= hdul['OIII5006_FLUX'].data
     imHb= hdul['HB4861_FLUX'].data
-    #imNii = hdul['NII6548_FLUX'].data
-    im = [imHa, imSii, imHb, imOiii]
+    imNii = hdul['NII6548_FLUX'].data
+    im = [imHa, imNii, imHb, imOiii]
     im = np.array(im)
-    im_names = ["$H\\alpha$", "SII", "$H\\beta$", "OIII"]
+    im_names = ["$H\\alpha$", "NII", "$H\\beta$", "OIII"]
 
     imHa_err = hdul['HA6562_FLUX_ERR'].data   #import errors
-    imSii_err= hdul['SII6716_FLUX_ERR'].data
+    #imSii_err= hdul['SII6716_FLUX_ERR'].data
     imOiii_err= hdul['OIII5006_FLUX_ERR'].data
     imHb_err= hdul['HB4861_FLUX_ERR'].data
-    #imNii_err = hdul['NII6548_FLUX_ERR'].data
-    im_err = [imHa_err, imSii_err, imHb_err, imOiii_err]
+    imNii_err = hdul['NII6548_FLUX_ERR'].data
+    im_err = [imHa_err, imNii_err, imHb_err, imOiii_err]
     im_err = np.array(im_err)
 
 ARCSEC = 0.2   #arcesc per pixel
@@ -64,7 +63,10 @@ def plot4x4(datavec, minclim, maxclim, title, c, intpol):
     plt.show()
     
 def kewley(f):
-  return 1.30 + 0.72 / (f - 0.32)   #central lambdas are slightly different
+  return 1.19 + 0.61 / (f - 0.47)   #central lambdas are slightly different
+
+def kauffmann(f):
+    return 1.3 + 0.61 / (f - 0.05)
 
 def SB_pixel(f):
     return f / N_PIX / ARCSEC**2
@@ -167,21 +169,25 @@ for i in range(4):
 x = np.log10(flux[1] / flux[0])
 y = np.log10(flux[3] / flux[2])
 
-x_axis = np.linspace(-1.2, 0, 100)
+x_axis_kw = np.linspace(-1.6, 0.2, 100)
+x_axis_kf = np.linspace(-1.6, -0.1, 100)
 
 cc = y - kewley(x)
 
 plt.figure(dpi=150)
 #plt.scatter(x, y, s=15, color='royalblue')
 plt.scatter(x, y, c=cc, s=15, cmap='RdYlBu_r', clim=[-1.5, 1.5])
-plt.plot(x_axis, kewley(x_axis), color='gold', label='Kewley')
+plt.plot(x_axis_kw, kewley(x_axis_kw), color='gold', label='Kewley')
+plt.plot(x_axis_kf, kauffmann(x_axis_kf), color='gold', ls='dashed', label='Kauffmann')
 plt.legend(loc=4)
 plt.colorbar()
+plt.xlim(-1.7, 0.4)
+plt.ylim(-1.2, 1)
 plt.title("BPT diagram")
-plt.xlabel('Log (SII/$H\\alpha$)')
+plt.xlabel('Log (NII/$H\\alpha$)')
 plt.ylabel('Log (OIII/$H\\beta$)')
-plt.text(-1.1, 0.35, "stellar ionization", color='cornflowerblue')
-plt.text(-0.6, 0.7, "AGN ionization", color='indianred')
+plt.text(-1.6, 0.45, "stellar ionization", color='cornflowerblue')
+plt.text(-0.5, 0.7, "AGN ionization", color='indianred')
 plt.show()
 
 #convert from apertures to points
@@ -197,7 +203,5 @@ plt.scatter(circles_x, circles_y, c=cc, cmap='RdYlBu_r', clim=[-1.5, 1.5])
 plt.title("Ionization map")
 plt.colorbar(label='distance from Kewley law')
 plt.show()
-
-
 
 

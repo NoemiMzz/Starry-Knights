@@ -101,6 +101,9 @@ plt.show()
 imnetHa = net(imHa, imR, A)
 plotimage(imnetHa, 0, 1.7e-16, 'Net $H_{\\alpha}$')
 
+out = fits.PrimaryHDU(imnetHa)
+out.writeto(path+'M74_netHa.fits', overwrite=True)
+
 
 #%%
 ### GALAXY APERTURE ############################################################################################

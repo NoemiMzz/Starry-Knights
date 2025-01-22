@@ -2,7 +2,6 @@
 #import os
 #from google.colab import drive
 import numpy as np
-import matplotlib.colors as mc
 import matplotlib.pyplot as plt
 from astropy.io import fits
 import photutils.aperture as pha
@@ -40,8 +39,6 @@ with fits.open(path+'m74datacube.fits') as hdul:
     im_err = [imHa_err, imSii_err, imHb_err, imOiii_err]
     im_err = np.array(im_err)
 
-ARCSEC = 0.2   #arcesc per pixel
-
 
 #%%
 ### FUNCTIONS ##################################################################################################
@@ -65,9 +62,6 @@ def plot4x4(datavec, minclim, maxclim, title, c, intpol):
     
 def kewley(f):
   return 1.30 + 0.72 / (f - 0.32)   #central lambdas are slightly different
-
-def SB_pixel(f):
-    return f / N_PIX / ARCSEC**2
     
     
 #%%
@@ -108,16 +102,16 @@ y = np.arange(0, 1401, 20)
 min_valid_pixels = 274   #~90% of 305, which is the n. of pixels in each aperture
 aperture_array = [pha.CircularAperture((xi, yi), r=radius) for xi in x for yi in y]
 
-N_PIX = 305   #numebr of pixels in an apertures defined in this way
-
 valid_aperture_idx = []
 
 #we chose to select the valid apertures using the OIII image since it's the one with less points with SN > 5
 
 for j, ap in tqdm(enumerate(aperture_array)):
-    f = pha.aperture_photometry(im[3], ap)['aperture_sum'][0]
-    #we select apertures with surface brightness per pixel bigger than a certain treshold
-    if SB_pixel(f) > 2200:
+    mask = ap.to_mask(method='center')   #masking the pixels inside each aperture
+    #adapting the mask to image dimensions (1=inside, 0=out, an intermediate value otherwise)
+    cutout = mask.to_image(im_SN[3].shape)   #coordinates of the pixels inside each aperture
+    covered_pixels = im_SN[3][cutout.astype(bool)]   
+    if np.count_nonzero(~np.isnan(covered_pixels)) > min_valid_pixels:   #number of pixels inside each aperture
         valid_aperture_idx.append(j)
 
 apertures = []
@@ -139,7 +133,7 @@ print(len(apertures))
 fig, axs = plt.subplots(2, 2, figsize=(9, 8), dpi=150, sharey=True, sharex=True)
 ax = axs.flatten()
 for i in range(4):
-    color = ax[i].imshow(im[i], cmap='viridis', clim=[0, 1000], interpolation='None')
+    color = ax[i].imshow(im_SN[i], cmap='viridis', clim=[0, 1000], interpolation='None')
     ax[i].set_title(im_names[i])
     for ap in apertures:
         ap.plot(color='red', lw=0.8, ax=ax[i])
@@ -153,10 +147,21 @@ plt.show()
 
 flux = []
 
+im_SN_nonan = np.where(np.isnan(im_SN), 0, im_SN)
+
 for i in range(4):
     f = []
     for ap in apertures:
-        f.append(pha.aperture_photometry(im[i], ap)['aperture_sum'][0])
+        #counting the number of pixels in each aperture
+        mask = ap.to_mask(method='center')
+        cutout = mask.to_image(im_SN[i].shape)
+        covered_pixels = im_SN[i][cutout.astype(bool)]
+        n_pix = np.count_nonzero(~np.isnan(covered_pixels))
+        if n_pix < 305:   #if the number of valid pixels inside the aperture is <305
+            ff = pha.aperture_photometry(im_SN_nonan[i], ap)['aperture_sum'][0]
+            f.append( ff / n_pix * 305 )   #I normalize the flux on 305 pixels
+        else:
+            f.append(pha.aperture_photometry(im_SN_nonan[i], ap)['aperture_sum'][0])
     f = np.array(f)
     flux.append(f)
     
@@ -174,8 +179,7 @@ cc = y - kewley(x)
 plt.figure(dpi=150)
 #plt.scatter(x, y, s=15, color='royalblue')
 plt.scatter(x, y, c=cc, s=15, cmap='RdYlBu_r', clim=[-1.5, 1.5])
-plt.plot(x_axis, kewley(x_axis), color='gold', label='Kewley')
-plt.legend(loc=4)
+plt.plot(x_axis, kewley(x_axis), color='gold')
 plt.colorbar()
 plt.title("BPT diagram")
 plt.xlabel('Log (SII/$H\\alpha$)')
@@ -183,21 +187,4 @@ plt.ylabel('Log (OIII/$H\\beta$)')
 plt.text(-1.1, 0.35, "stellar ionization", color='cornflowerblue')
 plt.text(-0.6, 0.7, "AGN ionization", color='indianred')
 plt.show()
-
-#convert from apertures to points
-circles_x = []
-circles_y = []
-[circles_x.append(ap.positions[0]) for ap in apertures]
-[circles_y.append(ap.positions[1]) for ap in apertures]
-
-#show the ionization map on the galaxy
-plt.figure(dpi=150)
-plt.imshow(im_SN[0], cmap='Greys', clim=[0, 1000], alpha=0.4)
-plt.scatter(circles_x, circles_y, c=cc, cmap='RdYlBu_r', clim=[-1.5, 1.5])
-plt.title("Ionization map")
-plt.colorbar(label='distance from Kewley law')
-plt.show()
-
-
-
 
