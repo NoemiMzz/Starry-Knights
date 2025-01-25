@@ -61,7 +61,7 @@ areaSDSS = areaSDSS_as / px**2   #SDSS aperture in pixels
 flux_r = m_to_flux(mag_r, lambda_r)   #flux in physycal units
 fr = flux_r * 10**C_r   #flux in electrons/s
 
-f_sky_r = (sigma_sky * 10**C_r * 300)**2 / 300 / area_sky * areaSDSS  #sky flux in electrons/s (normalized on #pix)
+f_sky_r = (sigma_sky * 10**C_Ha * 1200)**2 / 1200 / area_sky * areaSDSS  #sky flux in electrons/s (normalized on #pix)
 
 Texp_r = (5 * np.sqrt(fr + f_sky_r) / fr)**2   #exposure time in s
 
