@@ -8,9 +8,6 @@ def m_to_flux(mag, lambda_c):
     f = f0 * 10**(-mag/2.5)   #flux in erg/s/cm2/Hz
     return f * 3*10**(18) / lambda_c**2
 
-def color_transformation(SDSS_r, SDSS_g):
-    return SDSS_r - 0.2568 * (SDSS_g - SDSS_r) + 0.1470
-
 
 #%%
 ### PARAMETERS Ha ##############################################################################################
@@ -53,27 +50,22 @@ F0 = 3631   #reference flux in Junsky
 
 lambda_r = 6165.0   #central wavelenght of the filter in A of SDSS
 
-mag_correction = False
-if mag_correction:
-    SDSS_r = 10.66      #magnetude from NED (SDSS)
-    SDSS_g = 11.3
-else:
-    mag_r = 10.66   #magnetude from NED (SDSS)
+mag_r = 10.66   #magnetude from NED (SDSS)
 
 C_r = 17.125059673553615
 
 areaSDSS_as = 346 * 55   #SDSS aperture in arcsec
 areaSDSS = areaSDSS_as / px**2   #SDSS aperture in pixels
 
-### R EXPOSURE TIME ############################################################################################
+sigma_r = 132.90562750247273
 
-if mag_correction:
-    mag_r = color_transformation(SDSS_r, SDSS_g)
+
+### R EXPOSURE TIME ############################################################################################
 
 flux_r = m_to_flux(mag_r, lambda_r)   #flux in physycal units
 fr = flux_r * 10**C_r   #flux in electrons/s
 
-f_sky_r = (sigma_sky * 10**C_Ha * 1200)**2 / 1200 / area_sky * areaSDSS  #sky flux in electrons/s (normalized on #pix)
+f_sky_r = areaSDSS * sigma_r**2 / 300   #sky flux in electrons/s
 
 Texp_r = (5 * np.sqrt(fr + f_sky_r) / fr)**2   #exposure time in s
 

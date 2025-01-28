@@ -184,6 +184,14 @@ plotimage(mask[3], 7650, 7850, 'Mask - 4')
 
 
 #%%
+### SIGMA SKY (PROPOSAL) #######################################################################################
+
+sigma_sky_pix = [np.nanstd(mask[i]) for i in range(n_im)]
+
+sigma_sky_pix_mean = np.mean(sigma_sky_pix)
+
+
+#%%
 ### SKY FIT ####################################################################################################
 
 apx, apy = np.meshgrid(np.arange(4499), np.arange(3599))
